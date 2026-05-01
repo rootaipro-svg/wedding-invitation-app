@@ -65,12 +65,13 @@ function WhatsAppIcon() {
 
 export default function Home() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+
   const [templateUrl, setTemplateUrl] = useState("");
-  const [guestName, setGuestName] = useState("الأخ / أحمد سالم عبدالله");
+  const [guestName, setGuestName] = useState("عمر يماني الجابري");
   const [phone, setPhone] = useState("777111111");
-  const [message, setMessage] = useState(
-    "السلام عليكم ورحمة الله وبركاته\\nيشرفنا دعوتكم لحضور حفل الزواج.\\nمرفق لكم بطاقة الدعوة."
-  );
+  const [message, setMessage] = useState(`السلام عليكم ورحمة الله وبركاته
+يشرفنا دعوتكم لحضور حفل الزواج.
+المرفق لكم بطاقة الدعوة.`);
   const [xPercent, setXPercent] = useState(50);
   const [yPercent, setYPercent] = useState(58);
   const [fontSize, setFontSize] = useState(54);
@@ -81,6 +82,7 @@ export default function Home() {
   const [imageReady, setImageReady] = useState(false);
   const [status, setStatus] = useState("");
   const [canInstall, setCanInstall] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(true);
 
   useEffect(() => {
     const handler = (e: Event) => {
@@ -107,13 +109,15 @@ export default function Home() {
   function handleTemplateUpload(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
     if (!file) return;
+
     if (!file.type.startsWith("image/")) {
       setStatus("الملف المرفوع ليس صورة صحيحة.");
       return;
     }
+
     const url = URL.createObjectURL(file);
     setTemplateUrl(url);
-    setStatus("تم رفع القالب بنجاح. يمكنك الآن تعديل مكان الاسم حسب التصميم.");
+    setStatus("تم رفع القالب. عدّل مكان الاسم وسترى النتيجة مباشرة.");
   }
 
   useEffect(() => {
@@ -156,15 +160,16 @@ export default function Home() {
       const totalHeight = (lines.length - 1) * lineGap;
 
       ctx.save();
-      ctx.shadowColor = "rgba(255,255,255,0.95)";
+      ctx.shadowColor = "rgba(255,255,255,0.96)";
       ctx.shadowBlur = Math.round(12 * scale);
       ctx.shadowOffsetX = 0;
       ctx.shadowOffsetY = 0;
+
       lines.forEach((line, index) => {
         ctx.fillText(line, x, y - totalHeight / 2 + index * lineGap);
       });
-      ctx.restore();
 
+      ctx.restore();
       setImageReady(true);
     };
 
@@ -178,9 +183,10 @@ export default function Home() {
 
   async function installApp() {
     if (!window.deferredPrompt) {
-      setStatus("إذا لم يظهر زر التثبيت على جهازك، افتح قائمة المتصفح ثم اختر: إضافة إلى الشاشة الرئيسية.");
+      setStatus("إذا لم يظهر زر التثبيت، افتح قائمة المتصفح واختر: إضافة إلى الشاشة الرئيسية.");
       return;
     }
+
     await window.deferredPrompt.prompt();
     await window.deferredPrompt.userChoice;
     window.deferredPrompt = null;
@@ -199,8 +205,9 @@ export default function Home() {
       setStatus("ارفع قالب الدعوة أولًا.");
       return;
     }
+
     const link = document.createElement("a");
-    const safeName = guestName.replace(/[\/:*?"<>|]/g, "").slice(0, 60);
+    const safeName = guestName.replace(/[\\/:*?"<>|]/g, "").slice(0, 60);
     link.download = `دعوة - ${safeName || "مدعو"}.png`;
     link.href = dataUrl;
     link.click();
@@ -213,17 +220,18 @@ export default function Home() {
       setStatus("ارفع قالب الدعوة أولًا.");
       return;
     }
+
     const file = dataUrlToFile(dataUrl, "wedding-invitation.png");
     const nav = navigator as Navigator & { canShare?: (data: ShareData) => boolean };
 
     if (navigator.share && (!nav.canShare || nav.canShare({ files: [file] }))) {
       try {
         await navigator.share({
-          title: "دعوة زواج",
+          title: "بطاقة دعوة",
           text: message,
           files: [file],
         });
-        setStatus("تم فتح نافذة المشاركة. اختر واتساب لإرسال الصورة.");
+        setStatus("تم فتح نافذة المشاركة. اختر واتساب أو أي تطبيق مناسب.");
       } catch {
         setStatus("تم إلغاء المشاركة أو تعذرت من المتصفح.");
       }
@@ -237,6 +245,7 @@ export default function Home() {
       setStatus("اكتب رقم الجوال أولًا.");
       return;
     }
+
     window.open(whatsappUrl, "_blank", "noopener,noreferrer");
   }
 
@@ -248,45 +257,77 @@ export default function Home() {
     setLineHeight(1.35);
     setFontColor("#6F1D1B");
     setFontWeight("700");
-    setStatus("تمت إعادة الضبط.");
+    setStatus("تمت إعادة ضبط الإعدادات.");
   }
 
   return (
     <main className="app-shell">
-      <div className="topbar">
+      <header className="topbar">
         <div className="brand">
-          <Image src="/logo.png" alt="شعار أبو يماني" width={54} height={54} className="brand-logo" />
+          <Image src="/logo.png" alt="شعار التطبيق" width={52} height={52} className="brand-logo" />
           <div className="brand-title">
             <h1>تجهيز دعوات الزواج</h1>
-            <p>واجهة عملية وسريعة لتخصيص بطاقة الدعوة ومشاركتها</p>
+            <p>خصص بطاقة الدعوة بسرعة ثم حمّلها أو شاركها</p>
           </div>
         </div>
+
         {canInstall ? (
-          <button className="install-btn" onClick={installApp}>تثبيت التطبيق</button>
+          <button className="install-btn" onClick={installApp}>
+            تثبيت التطبيق
+          </button>
         ) : null}
-      </div>
+      </header>
 
       <section className="hero-card">
         <div className="hero-copy">
           <div className="hero-copy-text">
             <h2>جهّز بطاقة الدعوة خلال ثوانٍ</h2>
-            <p>
-              ارفع القالب، اكتب اسم المدعو ورقم الجوال، ثم حمّل الصورة أو شاركها بسهولة.
-              تم تصميم الواجهة لتكون مناسبة للجوال ويمكن تثبيتها كتطبيق على أندرويد.
-            </p>
-          </div>
-          <div className="developer-badge">
-            <Image src="/logo.png" alt="أبو يماني" width={34} height={34} />
-            <span>تصميم وبرمجة أبو يماني</span>
+            <p>ارفع القالب، اكتب الاسم، ثم حرّك الإعدادات وسترى النتيجة فورًا أمامك بدون الحاجة للنزول والرجوع في كل مرة.</p>
           </div>
         </div>
       </section>
 
-      <section className="layout-grid">
-        <div className="card">
-          <h3>بيانات الدعوة</h3>
+      <section className="main-layout">
+        <section className="preview-column">
+          <div className="card preview-card">
+            <div className="preview-header">
+              <div>
+                <h3>المعاينة المباشرة</h3>
+                <div className="preview-meta">أي تعديل على الاسم أو الإعدادات سيظهر هنا مباشرة.</div>
+              </div>
+              <div className="chip-row">
+                <div className="chip">معاينة فورية</div>
+                <div className="chip">مناسب للجوال</div>
+              </div>
+            </div>
 
-          <div className="panel">
+            <div className="preview-stage">
+              {templateUrl ? (
+                <canvas ref={canvasRef} />
+              ) : (
+                <div className="placeholder">
+                  <strong>ارفع قالب الدعوة أولًا</strong>
+                  <br />
+                  ستظهر البطاقة هنا مع الاسم بشكل مباشر.
+                </div>
+              )}
+            </div>
+
+            <div className="actions sticky-actions">
+              <button className="btn btn-secondary" onClick={resetPosition}>إعادة الضبط</button>
+              <button className="btn btn-primary" disabled={!imageReady} onClick={shareImage}>مشاركة الصورة</button>
+              <button className="btn btn-outline" disabled={!imageReady} onClick={downloadImage}>تحميل الصورة</button>
+              <button className="btn btn-secondary" onClick={openWhatsApp}>فتح واتساب</button>
+            </div>
+
+            {status ? <div className="status">{status}</div> : null}
+          </div>
+        </section>
+
+        <section className="form-column">
+          <div className="card">
+            <h3>بيانات الدعوة</h3>
+
             <div className="field">
               <label>قالب الدعوة</label>
               <input className="input" type="file" accept="image/*" onChange={handleTemplateUpload} />
@@ -301,104 +342,83 @@ export default function Home() {
             <div className="field">
               <label>رقم الجوال</label>
               <input className="input" dir="ltr" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="777111111" />
-              <small className="field-help">للأرقام اليمنية: إذا أدخلت 9 أرقام تبدأ بـ 7 فسيتم تحويلها تلقائيًا إلى صيغة دولية.</small>
             </div>
 
             <div className="field">
               <label>رسالة واتساب</label>
-              <textarea className="textarea" rows={5} value={message} onChange={(e) => setMessage(e.target.value)} />
+              <textarea className="textarea" rows={4} value={message} onChange={(e) => setMessage(e.target.value)} />
             </div>
           </div>
 
-          <div className="section-title">إعدادات الاسم على القالب</div>
-          <div className="panel">
-            <div className="two-col">
-              <div className="field">
-                <label>الموقع الأفقي X</label>
-                <div className="range-grid">
-                  <input type="range" min="0" max="100" value={xPercent} onChange={(e) => setXPercent(Number(e.target.value))} />
-                  <input className="input" dir="ltr" value={xPercent} onChange={(e) => setXPercent(Number(e.target.value))} />
+          <div className="card settings-card">
+            <button className="settings-toggle" onClick={() => setSettingsOpen((v) => !v)}>
+              <span>إعدادات الاسم على القالب</span>
+              <span>{settingsOpen ? "إخفاء" : "إظهار"}</span>
+            </button>
+
+            {settingsOpen ? (
+              <div className="settings-content">
+                <div className="two-col">
+                  <div className="field">
+                    <label>الموقع الأفقي X</label>
+                    <div className="range-grid">
+                      <input type="range" min="0" max="100" value={xPercent} onChange={(e) => setXPercent(Number(e.target.value))} />
+                      <input className="input" dir="ltr" value={xPercent} onChange={(e) => setXPercent(Number(e.target.value))} />
+                    </div>
+                  </div>
+
+                  <div className="field">
+                    <label>الموقع الرأسي Y</label>
+                    <div className="range-grid">
+                      <input type="range" min="0" max="100" value={yPercent} onChange={(e) => setYPercent(Number(e.target.value))} />
+                      <input className="input" dir="ltr" value={yPercent} onChange={(e) => setYPercent(Number(e.target.value))} />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="two-col">
+                  <div className="field">
+                    <label>حجم الخط</label>
+                    <input className="input" type="number" dir="ltr" value={fontSize} min="10" max="160" onChange={(e) => setFontSize(Number(e.target.value))} />
+                  </div>
+
+                  <div className="field">
+                    <label>عرض النص</label>
+                    <input className="input" type="number" dir="ltr" value={boxWidthPercent} min="20" max="100" onChange={(e) => setBoxWidthPercent(Number(e.target.value))} />
+                  </div>
+                </div>
+
+                <div className="two-col">
+                  <div className="field">
+                    <label>سماكة الخط</label>
+                    <select className="select" value={fontWeight} onChange={(e) => setFontWeight(e.target.value as FontWeight)}>
+                      <option value="400">عادي</option>
+                      <option value="700">عريض</option>
+                    </select>
+                  </div>
+
+                  <div className="field">
+                    <label>لون الخط</label>
+                    <div className="color-grid">
+                      <input className="input" dir="ltr" value={fontColor} onChange={(e) => setFontColor(e.target.value)} />
+                      <input type="color" value={fontColor} onChange={(e) => setFontColor(e.target.value)} />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="field">
+                  <label>تباعد الأسطر</label>
+                  <input className="input" type="number" step="0.05" min="1" max="2.5" dir="ltr" value={lineHeight} onChange={(e) => setLineHeight(Number(e.target.value))} />
                 </div>
               </div>
-              <div className="field">
-                <label>الموقع الرأسي Y</label>
-                <div className="range-grid">
-                  <input type="range" min="0" max="100" value={yPercent} onChange={(e) => setYPercent(Number(e.target.value))} />
-                  <input className="input" dir="ltr" value={yPercent} onChange={(e) => setYPercent(Number(e.target.value))} />
-                </div>
-              </div>
-            </div>
-
-            <div className="two-col">
-              <div className="field">
-                <label>حجم الخط</label>
-                <input className="input" type="number" dir="ltr" value={fontSize} min="10" max="160" onChange={(e) => setFontSize(Number(e.target.value))} />
-              </div>
-              <div className="field">
-                <label>عرض النص</label>
-                <input className="input" type="number" dir="ltr" value={boxWidthPercent} min="20" max="100" onChange={(e) => setBoxWidthPercent(Number(e.target.value))} />
-              </div>
-            </div>
-
-            <div className="two-col">
-              <div className="field">
-                <label>سماكة الخط</label>
-                <select className="select" value={fontWeight} onChange={(e) => setFontWeight(e.target.value as FontWeight)}>
-                  <option value="400">عادي</option>
-                  <option value="700">عريض</option>
-                </select>
-              </div>
-              <div className="field">
-                <label>لون الخط</label>
-                <div className="color-grid">
-                  <input className="input" dir="ltr" value={fontColor} onChange={(e) => setFontColor(e.target.value)} />
-                  <input type="color" value={fontColor} onChange={(e) => setFontColor(e.target.value)} />
-                </div>
-              </div>
-            </div>
-
-            <div className="field">
-              <label>تباعد الأسطر</label>
-              <input className="input" type="number" step="0.05" min="1" max="2.5" dir="ltr" value={lineHeight} onChange={(e) => setLineHeight(Number(e.target.value))} />
-            </div>
+            ) : null}
           </div>
-
-          <div className="actions">
-            <button className="btn btn-secondary" onClick={resetPosition}>إعادة ضبط الإعدادات</button>
-            <button className="btn btn-primary" disabled={!imageReady} onClick={shareImage}>مشاركة الصورة</button>
-            <button className="btn btn-outline" disabled={!imageReady} onClick={downloadImage}>تحميل الصورة</button>
-            <button className="btn btn-secondary" onClick={openWhatsApp}>فتح واتساب للرقم</button>
-          </div>
-
-          {status ? <div className="status">{status}</div> : null}
-        </div>
-
-        <div className="card preview-shell">
-          <div className="preview-header">
-            <div>
-              <h3>المعاينة</h3>
-              <div className="preview-meta">ستظهر البطاقة النهائية هنا بعد رفع القالب.</div>
-            </div>
-            <div className="chip-row">
-              <div className="chip">جاهز للجوال</div>
-              <div className="chip">قابل للتثبيت</div>
-              <div className="chip">مشاركة سريعة</div>
-            </div>
-          </div>
-          <div className="preview-stage">
-            {templateUrl ? (
-              <canvas ref={canvasRef} />
-            ) : (
-              <div className="placeholder">
-                <strong>ارفع قالب الدعوة أولًا</strong>
-                <br />
-                بعد ذلك ستظهر البطاقة هنا مباشرة مع الاسم.
-              </div>
-            )}
-          </div>
-          <div className="footer">تصميم وبرمجة أبو يماني</div>
-        </div>
+        </section>
       </section>
+
+      <footer className="footer">
+        <div>تصميم وبرمجة أبو يماني</div>
+      </footer>
 
       <a
         className="whatsapp-float"
