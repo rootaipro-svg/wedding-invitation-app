@@ -1,0 +1,25 @@
+{
+  "name": "تجهيز دعوات الزواج",
+  "short_name": "دعوات الزواج",
+  "description": "تطبيق لتجهيز بطاقات دعوات الزواج ومشاركتها بسهولة",
+  "lang": "ar",
+  "dir": "rtl",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f6efe5",
+  "theme_color": "#8b5d2b",
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
