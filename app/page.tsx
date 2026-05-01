@@ -69,20 +69,22 @@ export default function Home() {
   const [templateUrl, setTemplateUrl] = useState("");
   const [guestName, setGuestName] = useState("عمر يماني الجابري");
   const [phone, setPhone] = useState("777111111");
-  const [message, setMessage] = useState(`السلام عليكم ورحمة الله وبركاته
-يشرفنا دعوتكم لحضور حفل الزواج.
-المرفق لكم بطاقة الدعوة.`);
-  const [xPercent, setXPercent] = useState(50);
-  const [yPercent, setYPercent] = useState(58);
+  const [message, setMessage] = useState(
+    "السلام عليكم ورحمة الله وبركاته\nيشرفنا دعوتكم لحضور حفل الزواج.\nالمرفق لكم بطاقة الدعوة."
+  );
+
+  const [xPercent, setXPercent] = useState(40);
+  const [yPercent, setYPercent] = useState(22);
   const [fontSize, setFontSize] = useState(54);
-  const [fontColor, setFontColor] = useState("#6F1D1B");
+  const [fontColor, setFontColor] = useState("#8B2E2E");
   const [fontWeight, setFontWeight] = useState<FontWeight>("700");
   const [boxWidthPercent, setBoxWidthPercent] = useState(78);
   const [lineHeight, setLineHeight] = useState(1.35);
+
   const [imageReady, setImageReady] = useState(false);
   const [status, setStatus] = useState("");
   const [canInstall, setCanInstall] = useState(false);
-  const [settingsOpen, setSettingsOpen] = useState(true);
+  const [advancedOpen, setAdvancedOpen] = useState(false);
 
   useEffect(() => {
     const handler = (e: Event) => {
@@ -117,7 +119,7 @@ export default function Home() {
 
     const url = URL.createObjectURL(file);
     setTemplateUrl(url);
-    setStatus("تم رفع القالب. عدّل مكان الاسم وسترى النتيجة مباشرة.");
+    setStatus("تم رفع القالب. حرّك الاسم من الإعدادات وستظهر النتيجة مباشرة.");
   }
 
   useEffect(() => {
@@ -130,6 +132,7 @@ export default function Home() {
     if (!canvas) return;
 
     const img = new window.Image();
+
     img.onload = () => {
       const maxCanvasWidth = 1600;
       const scale = img.width > maxCanvasWidth ? maxCanvasWidth / img.width : 1;
@@ -179,7 +182,17 @@ export default function Home() {
     };
 
     img.src = templateUrl;
-  }, [templateUrl, guestName, xPercent, yPercent, fontSize, fontColor, fontWeight, boxWidthPercent, lineHeight]);
+  }, [
+    templateUrl,
+    guestName,
+    xPercent,
+    yPercent,
+    fontSize,
+    fontColor,
+    fontWeight,
+    boxWidthPercent,
+    lineHeight,
+  ]);
 
   async function installApp() {
     if (!window.deferredPrompt) {
@@ -250,174 +263,158 @@ export default function Home() {
   }
 
   function resetPosition() {
-    setXPercent(50);
-    setYPercent(58);
+    setXPercent(40);
+    setYPercent(22);
     setFontSize(54);
     setBoxWidthPercent(78);
     setLineHeight(1.35);
-    setFontColor("#6F1D1B");
+    setFontColor("#8B2E2E");
     setFontWeight("700");
-    setStatus("تمت إعادة ضبط الإعدادات.");
+    setStatus("تمت إعادة ضبط مكان الاسم.");
   }
 
   return (
     <main className="app-shell">
       <header className="topbar">
         <div className="brand">
-          <Image src="/logo.png" alt="شعار التطبيق" width={52} height={52} className="brand-logo" />
+          <Image src="/logo.png" alt="شعار التطبيق" width={48} height={48} className="brand-logo" />
           <div className="brand-title">
             <h1>تجهيز دعوات الزواج</h1>
-            <p>خصص بطاقة الدعوة بسرعة ثم حمّلها أو شاركها</p>
+            <p>خصص البطاقة وشاهد النتيجة مباشرة</p>
           </div>
         </div>
 
         {canInstall ? (
           <button className="install-btn" onClick={installApp}>
-            تثبيت التطبيق
+            تثبيت
           </button>
         ) : null}
       </header>
 
-      <section className="hero-card">
-        <div className="hero-copy">
-          <div className="hero-copy-text">
-            <h2>جهّز بطاقة الدعوة خلال ثوانٍ</h2>
-            <p>ارفع القالب، اكتب الاسم، ثم حرّك الإعدادات وسترى النتيجة فورًا أمامك بدون الحاجة للنزول والرجوع في كل مرة.</p>
+      <section className="mobile-flow">
+        <div className="card compact-card">
+          <div className="field">
+            <label>قالب الدعوة</label>
+            <input className="input" type="file" accept="image/*" onChange={handleTemplateUpload} />
+          </div>
+
+          <div className="field">
+            <label>اسم المدعو</label>
+            <input className="input" value={guestName} onChange={(e) => setGuestName(e.target.value)} />
           </div>
         </div>
-      </section>
 
-      <section className="main-layout">
-        <section className="preview-column">
-          <div className="card preview-card">
-            <div className="preview-header">
-              <div>
-                <h3>المعاينة المباشرة</h3>
-                <div className="preview-meta">أي تعديل على الاسم أو الإعدادات سيظهر هنا مباشرة.</div>
-              </div>
-              <div className="chip-row">
-                <div className="chip">معاينة فورية</div>
-                <div className="chip">مناسب للجوال</div>
-              </div>
-            </div>
-
-            <div className="preview-stage">
-              {templateUrl ? (
-                <canvas ref={canvasRef} />
-              ) : (
-                <div className="placeholder">
-                  <strong>ارفع قالب الدعوة أولًا</strong>
-                  <br />
-                  ستظهر البطاقة هنا مع الاسم بشكل مباشر.
-                </div>
-              )}
-            </div>
-
-            <div className="actions sticky-actions">
-              <button className="btn btn-secondary" onClick={resetPosition}>إعادة الضبط</button>
-              <button className="btn btn-primary" disabled={!imageReady} onClick={shareImage}>مشاركة الصورة</button>
-              <button className="btn btn-outline" disabled={!imageReady} onClick={downloadImage}>تحميل الصورة</button>
-              <button className="btn btn-secondary" onClick={openWhatsApp}>فتح واتساب</button>
-            </div>
-
-            {status ? <div className="status">{status}</div> : null}
-          </div>
-        </section>
-
-        <section className="form-column">
-          <div className="card">
-            <h3>بيانات الدعوة</h3>
-
-            <div className="field">
-              <label>قالب الدعوة</label>
-              <input className="input" type="file" accept="image/*" onChange={handleTemplateUpload} />
-              <small className="field-help">اختر صورة الدعوة، ويفضل أن تكون مساحة الاسم واضحة داخل التصميم.</small>
-            </div>
-
-            <div className="field">
-              <label>اسم المدعو</label>
-              <input className="input" value={guestName} onChange={(e) => setGuestName(e.target.value)} />
-            </div>
-
-            <div className="field">
-              <label>رقم الجوال</label>
-              <input className="input" dir="ltr" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="777111111" />
-            </div>
-
-            <div className="field">
-              <label>رسالة واتساب</label>
-              <textarea className="textarea" rows={4} value={message} onChange={(e) => setMessage(e.target.value)} />
+        <div className="card preview-card">
+          <div className="preview-title-row">
+            <div>
+              <h2>المعاينة المباشرة</h2>
+              <p>عدّل الإعدادات أسفل الصورة وشاهد التغيير فورًا.</p>
             </div>
           </div>
 
-          <div className="card settings-card">
-            <button className="settings-toggle" onClick={() => setSettingsOpen((v) => !v)}>
-              <span>إعدادات الاسم على القالب</span>
-              <span>{settingsOpen ? "إخفاء" : "إظهار"}</span>
-            </button>
+          <div className="preview-stage">
+            {templateUrl ? (
+              <canvas ref={canvasRef} />
+            ) : (
+              <div className="placeholder">
+                <strong>ارفع قالب الدعوة أولًا</strong>
+                <br />
+                ستظهر البطاقة هنا مباشرة.
+              </div>
+            )}
+          </div>
+        </div>
 
-            {settingsOpen ? (
-              <div className="settings-content">
-                <div className="two-col">
-                  <div className="field">
-                    <label>الموقع الأفقي X</label>
-                    <div className="range-grid">
-                      <input type="range" min="0" max="100" value={xPercent} onChange={(e) => setXPercent(Number(e.target.value))} />
-                      <input className="input" dir="ltr" value={xPercent} onChange={(e) => setXPercent(Number(e.target.value))} />
-                    </div>
-                  </div>
+        <div className="card controls-card">
+          <h2>تحريك الاسم على القالب</h2>
 
-                  <div className="field">
-                    <label>الموقع الرأسي Y</label>
-                    <div className="range-grid">
-                      <input type="range" min="0" max="100" value={yPercent} onChange={(e) => setYPercent(Number(e.target.value))} />
-                      <input className="input" dir="ltr" value={yPercent} onChange={(e) => setYPercent(Number(e.target.value))} />
-                    </div>
-                  </div>
-                </div>
+          <div className="field">
+            <label>يمين / يسار</label>
+            <div className="range-grid">
+              <input type="range" min="0" max="100" value={xPercent} onChange={(e) => setXPercent(Number(e.target.value))} />
+              <input className="input mini-input" dir="ltr" value={xPercent} onChange={(e) => setXPercent(Number(e.target.value))} />
+            </div>
+          </div>
 
-                <div className="two-col">
-                  <div className="field">
-                    <label>حجم الخط</label>
-                    <input className="input" type="number" dir="ltr" value={fontSize} min="10" max="160" onChange={(e) => setFontSize(Number(e.target.value))} />
-                  </div>
+          <div className="field">
+            <label>أعلى / أسفل</label>
+            <div className="range-grid">
+              <input type="range" min="0" max="100" value={yPercent} onChange={(e) => setYPercent(Number(e.target.value))} />
+              <input className="input mini-input" dir="ltr" value={yPercent} onChange={(e) => setYPercent(Number(e.target.value))} />
+            </div>
+          </div>
 
-                  <div className="field">
-                    <label>عرض النص</label>
-                    <input className="input" type="number" dir="ltr" value={boxWidthPercent} min="20" max="100" onChange={(e) => setBoxWidthPercent(Number(e.target.value))} />
-                  </div>
-                </div>
+          <div className="two-col">
+            <div className="field">
+              <label>حجم الخط</label>
+              <input className="input" type="number" dir="ltr" value={fontSize} min="10" max="160" onChange={(e) => setFontSize(Number(e.target.value))} />
+            </div>
 
-                <div className="two-col">
-                  <div className="field">
-                    <label>سماكة الخط</label>
-                    <select className="select" value={fontWeight} onChange={(e) => setFontWeight(e.target.value as FontWeight)}>
-                      <option value="400">عادي</option>
-                      <option value="700">عريض</option>
-                    </select>
-                  </div>
+            <div className="field">
+              <label>عرض الاسم</label>
+              <input className="input" type="number" dir="ltr" value={boxWidthPercent} min="20" max="100" onChange={(e) => setBoxWidthPercent(Number(e.target.value))} />
+            </div>
+          </div>
 
-                  <div className="field">
-                    <label>لون الخط</label>
-                    <div className="color-grid">
-                      <input className="input" dir="ltr" value={fontColor} onChange={(e) => setFontColor(e.target.value)} />
-                      <input type="color" value={fontColor} onChange={(e) => setFontColor(e.target.value)} />
-                    </div>
-                  </div>
+          <button className="advanced-toggle" onClick={() => setAdvancedOpen((value) => !value)}>
+            <span>إعدادات إضافية</span>
+            <span>{advancedOpen ? "إخفاء" : "إظهار"}</span>
+          </button>
+
+          {advancedOpen ? (
+            <div className="advanced-box">
+              <div className="two-col">
+                <div className="field">
+                  <label>سماكة الخط</label>
+                  <select className="select" value={fontWeight} onChange={(e) => setFontWeight(e.target.value as FontWeight)}>
+                    <option value="400">عادي</option>
+                    <option value="700">عريض</option>
+                  </select>
                 </div>
 
                 <div className="field">
-                  <label>تباعد الأسطر</label>
-                  <input className="input" type="number" step="0.05" min="1" max="2.5" dir="ltr" value={lineHeight} onChange={(e) => setLineHeight(Number(e.target.value))} />
+                  <label>لون الخط</label>
+                  <div className="color-grid">
+                    <input className="input" dir="ltr" value={fontColor} onChange={(e) => setFontColor(e.target.value)} />
+                    <input type="color" value={fontColor} onChange={(e) => setFontColor(e.target.value)} />
+                  </div>
                 </div>
               </div>
-            ) : null}
+
+              <div className="field">
+                <label>تباعد الأسطر</label>
+                <input className="input" type="number" step="0.05" min="1" max="2.5" dir="ltr" value={lineHeight} onChange={(e) => setLineHeight(Number(e.target.value))} />
+              </div>
+            </div>
+          ) : null}
+        </div>
+
+        <div className="card details-card">
+          <h2>الإرسال</h2>
+
+          <div className="field">
+            <label>رقم الجوال</label>
+            <input className="input" dir="ltr" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="777111111" />
           </div>
-        </section>
+
+          <div className="field">
+            <label>رسالة واتساب</label>
+            <textarea className="textarea" rows={4} value={message} onChange={(e) => setMessage(e.target.value)} />
+          </div>
+        </div>
+
+        {status ? <div className="status">{status}</div> : null}
       </section>
 
+      <div className="bottom-actions">
+        <button className="btn btn-secondary" onClick={resetPosition}>ضبط</button>
+        <button className="btn btn-primary" disabled={!imageReady} onClick={shareImage}>مشاركة</button>
+        <button className="btn btn-outline" disabled={!imageReady} onClick={downloadImage}>تحميل</button>
+        <button className="btn btn-secondary" onClick={openWhatsApp}>واتساب</button>
+      </div>
+
       <footer className="footer">
-        <div>تصميم وبرمجة أبو يماني</div>
+        تصميم وبرمجة أبو يماني
       </footer>
 
       <a
