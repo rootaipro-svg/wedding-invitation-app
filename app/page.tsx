@@ -69,9 +69,7 @@ export default function Home() {
   const [guestName, setGuestName] = useState("الأخ / أحمد سالم عبدالله");
   const [phone, setPhone] = useState("777111111");
   const [message, setMessage] = useState(
-    "السلام عليكم ورحمة الله وبركاته
-يشرفنا دعوتكم لحضور حفل الزواج.
-مرفق لكم بطاقة الدعوة."
+    "السلام عليكم ورحمة الله وبركاته\\nيشرفنا دعوتكم لحضور حفل الزواج.\\nمرفق لكم بطاقة الدعوة."
   );
   const [xPercent, setXPercent] = useState(50);
   const [yPercent, setYPercent] = useState(58);
