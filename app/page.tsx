@@ -74,9 +74,9 @@ export default function Home() {
 
   const [templateUrl, setTemplateUrl] = useState(DEFAULT_TEMPLATE_URL);
   const [guestName, setGuestName] = useState("عمر يماني الجابري");
-  const [phone, setPhone] = useState("777111111");
+  const [phone, setPhone] = useState("770816701");
   const [message, setMessage] = useState(
-    "السلام عليكم ورحمة الله وبركاته\nيشرفنا دعوتكم لحضور حفل الزواج.\nمرفق لكم بطاقة الدعوة."
+    "السلام عليكم ورحمة الله وبركاته\n\nيشرفنا دعوتكم لمشاركتنا فرحتنا"
   );
   const [imageReady, setImageReady] = useState(false);
   const [status, setStatus] = useState("");
@@ -279,7 +279,7 @@ export default function Home() {
             <h1>تجهيز دعوات الزواج</h1>
             <p>اكتب الاسم فقط وستظهر الدعوة مباشرة</p>
           </div>
-        </div>
+        
 
         {canInstall ? (
           <button className="install-btn" onClick={installApp}>
