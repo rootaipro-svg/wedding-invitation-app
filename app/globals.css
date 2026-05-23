@@ -1,3 +1,5 @@
+@import url("https://fonts.googleapis.com/css2?family=Aref+Ruqaa:wght@700&display=swap");
+
 :root {
   --bg: #f6efe5;
   --card: rgba(255,255,255,0.94);
@@ -156,7 +158,7 @@ a { color: inherit; text-decoration: none; }
 }
 
 .preview-stage {
-  height: min(66vh, 620px);
+  height: min(68vh, 640px);
   min-height: 390px;
   display: grid;
   place-items: center;

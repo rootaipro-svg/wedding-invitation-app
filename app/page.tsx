@@ -22,15 +22,15 @@ declare global {
   - أنقص NAME_Y_PERCENT لرفع الاسم
 */
 const DEFAULT_TEMPLATE_URL = "/fixed-invitation-template.png";
-const NAME_X_PERCENT = 50;
-const NAME_Y_PERCENT = 27.0;
-const NAME_FONT_SIZE = 46;
+const NAME_X_PERCENT = 42.2;
+const NAME_Y_PERCENT = 30.1;
+const NAME_FONT_SIZE = 48;
 const NAME_BOX_WIDTH_PERCENT = 76;
 const NAME_COLOR = "#000000";
-const NAME_WEIGHT = "400";
+const NAME_WEIGHT = "700";
 const DIWANI_FONT_NAME = "DiwaniCustom";
 const FALLBACK_FONT =
-  '"DiwaniCustom", "Aref Ruqaa", "Reem Kufi", "Amiri", "Times New Roman", Arial, Tahoma, serif';
+  '"DiwaniCustom", "Aref Ruqaa", "Amiri", "Times New Roman", Arial, Tahoma, serif';
 
 function normalizePhone(phone: string) {
   let value = String(phone || "").trim().replace(/[^\d]/g, "");
@@ -109,19 +109,25 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    async function loadDiwaniFont() {
+    async function loadFonts() {
+      try {
+        await document.fonts.load(`700 48px "Aref Ruqaa"`);
+      } catch {
+        // تجاهل
+      }
+
       try {
         const font = new FontFace(DIWANI_FONT_NAME, 'url("/fonts/Diwani.ttf")');
         await font.load();
         document.fonts.add(font);
-        setFontLoaded(true);
       } catch {
-        // التطبيق سيعمل بخط احتياطي إذا لم يكن ملف Diwani.ttf موجودًا
-        setFontLoaded(false);
+        // إذا لم يوجد خط Diwani.ttf سيستخدم التطبيق خط Aref Ruqaa
       }
+
+      setFontLoaded(true);
     }
 
-    loadDiwaniFont();
+    loadFonts();
   }, []);
 
   const whatsappUrl = useMemo(() => {
@@ -192,9 +198,8 @@ export default function Home() {
       ctx.textBaseline = "middle";
       ctx.direction = "rtl";
 
-      // ظل خفيف جدًا حتى لا يبدو الاسم مركبًا بشكل حاد
-      ctx.shadowColor = "rgba(255,255,255,0.65)";
-      ctx.shadowBlur = Math.round(1.5 * scale);
+      ctx.shadowColor = "transparent";
+      ctx.shadowBlur = 0;
       ctx.shadowOffsetX = 0;
       ctx.shadowOffsetY = 0;
 
@@ -287,7 +292,7 @@ export default function Home() {
           <Image src="/logo.png" alt="شعار التطبيق" width={48} height={48} className="brand-logo" />
           <div className="brand-title">
             <h1>تجهيز دعوات الزواج</h1>
-            <p>اكتب الاسم فقط وستجهز البطاقة</p>
+            <p>اكتب الاسم فقط وستظهر الدعوة مباشرة</p>
           </div>
         </div>
 
@@ -308,18 +313,11 @@ export default function Home() {
             placeholder="اكتب اسم المدعو هنا"
           />
         </div>
-
-        <details className="optional-template">
-          <summary>تغيير قالب الدعوة</summary>
-          <div className="field optional-upload">
-            <input className="input" type="file" accept="image/*" onChange={handleTemplateUpload} />
-          </div>
-        </details>
       </section>
 
       <section className="card preview-card">
         <h2>المعاينة</h2>
-        <p>الاسم يظهر تلقائيًا داخل المستطيل أسفل عبارة بدعوة المكرم.</p>
+        <p>الاسم يظهر تلقائيًا داخل المستطيل المخصص في الدعوة.</p>
 
         <div className="preview-stage">
           <canvas ref={canvasRef} />
