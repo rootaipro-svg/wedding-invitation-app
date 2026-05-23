@@ -23,8 +23,8 @@ declare global {
 */
 const DEFAULT_TEMPLATE_URL = "/fixed-invitation-template.png";
 const NAME_X_PERCENT = 42.2;
-const NAME_Y_PERCENT = 32.5;
-const NAME_FONT_SIZE = 60;
+const NAME_Y_PERCENT = 31.6;
+const NAME_FONT_SIZE = 48;
 const NAME_BOX_WIDTH_PERCENT = 76;
 const NAME_COLOR = "#000000";
 const NAME_WEIGHT = "700";
@@ -258,7 +258,7 @@ export default function Home() {
           text: message,
           files: [file],
         });
-        setStatus("تم فتح نافذة المشاركة. اختر واتساب أو أي تطبيق مناسب.");
+        setStatus("تم فتح نافذة المشاركة. اختر واتساب ثم أرسل الدعوة.");
       } catch {
         setStatus("تم إلغاء المشاركة أو تعذرت من المتصفح.");
       }
@@ -266,12 +266,6 @@ export default function Home() {
       setStatus("المتصفح لا يدعم مشاركة الصور مباشرة. استخدم زر تحميل الصورة ثم أرسلها من واتساب.");
     }
   }
-
-  function openWhatsApp() {
-    if (!whatsappUrl) {
-      setStatus("اكتب رقم الجوال أولًا.");
-      return;
-    }
 
     window.open(whatsappUrl, "_blank", "noopener,noreferrer");
   }
@@ -304,13 +298,7 @@ export default function Home() {
             placeholder="اكتب اسم المدعو هنا"
           />
         </div>
-
-        <div className="top-send-row">
-          <div className="field">
-            <label>رقم الجوال</label>
-            <input className="input" dir="ltr" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="777111111" />
-          </div>
-        </div>
+</div>
 
         <details className="compact-message">
           <summary>تعديل رسالة واتساب</summary>
@@ -334,9 +322,8 @@ export default function Home() {
       {status ? <div className="status">{status}</div> : null}
 
       <div className="bottom-actions">
-        <button className="btn btn-primary" disabled={!imageReady} onClick={shareImage}>مشاركة</button>
-        <button className="btn btn-outline" disabled={!imageReady} onClick={downloadImage}>تحميل</button>
-        <button className="btn btn-secondary" onClick={openWhatsApp}>واتساب</button>
+        <button className="btn btn-primary" disabled={!imageReady} onClick={shareImage}>إرسال الدعوة</button>
+        <button className="btn btn-outline" disabled={!imageReady} onClick={downloadImage}>تحميل الصورة</button>
       </div>
 
       <footer className="footer">
