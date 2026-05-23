@@ -23,8 +23,8 @@ declare global {
 */
 const DEFAULT_TEMPLATE_URL = "/fixed-invitation-template.png";
 const NAME_X_PERCENT = 42.2;
-const NAME_Y_PERCENT = 32.4;
-const NAME_FONT_SIZE = 55;
+const NAME_Y_PERCENT = 31.6;
+const NAME_FONT_SIZE = 48;
 const NAME_BOX_WIDTH_PERCENT = 76;
 const NAME_COLOR = "#000000";
 const NAME_WEIGHT = "700";
@@ -67,15 +67,6 @@ function fitSingleLineFontSize(
   }
 
   return minSize;
-}
-
-function WhatsAppIcon() {
-  return (
-    <svg viewBox="0 0 32 32" aria-hidden="true">
-      <path d="M19.11 17.39c-.28-.14-1.63-.8-1.89-.89-.25-.09-.43-.14-.62.14-.18.28-.71.89-.87 1.07-.16.18-.32.21-.6.07-.28-.14-1.16-.43-2.21-1.38-.81-.72-1.35-1.6-1.51-1.88-.16-.28-.02-.43.12-.57.12-.12.28-.32.42-.48.14-.16.18-.28.28-.46.09-.18.05-.35-.02-.48-.07-.14-.62-1.48-.85-2.03-.22-.52-.45-.45-.62-.46h-.53c-.18 0-.48.07-.74.35s-.96.94-.96 2.28c0 1.35.98 2.65 1.12 2.83.14.18 1.93 2.95 4.68 4.13.66.28 1.18.45 1.59.58.67.21 1.28.18 1.76.11.54-.08 1.63-.67 1.86-1.31.23-.64.23-1.19.16-1.31-.07-.11-.25-.18-.53-.32Z" />
-      <path d="M27.27 4.71A15.83 15.83 0 0 0 16.03.06C7.29.06.16 7.19.16 15.94c0 2.79.73 5.52 2.11 7.93L0 31.94l8.28-2.18a15.88 15.88 0 0 0 7.75 1.98h.01c8.74 0 15.87-7.13 15.87-15.87 0-4.24-1.65-8.23-4.64-11.16Zm-11.24 24.3h-.01a13.3 13.3 0 0 1-6.78-1.86l-.49-.29-4.92 1.29 1.31-4.8-.32-.49a13.26 13.26 0 0 1-2.03-7.08c0-7.33 5.96-13.29 13.29-13.29 3.54 0 6.87 1.38 9.37 3.87 2.5 2.5 3.88 5.83 3.88 9.37-.01 7.33-5.97 13.29-13.3 13.29Z" />
-    </svg>
-  );
 }
 
 export default function Home() {
@@ -303,7 +294,7 @@ export default function Home() {
         ) : null}
       </header>
 
-      <section className="card input-card">
+      <section className="card input-card compact-top">
         <div className="field">
           <label>اسم المدعو</label>
           <input
@@ -313,28 +304,30 @@ export default function Home() {
             placeholder="اكتب اسم المدعو هنا"
           />
         </div>
+
+        <div className="top-send-row">
+          <div className="field">
+            <label>رقم الجوال</label>
+            <input className="input" dir="ltr" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="777111111" />
+          </div>
+        </div>
+
+        <details className="compact-message">
+          <summary>تعديل رسالة واتساب</summary>
+          <textarea className="textarea compact-textarea" rows={3} value={message} onChange={(e) => setMessage(e.target.value)} />
+        </details>
+
+        <details className="optional-template">
+          <summary>تغيير قالب الدعوة</summary>
+          <div className="field optional-upload">
+            <input className="input" type="file" accept="image/*" onChange={handleTemplateUpload} />
+          </div>
+        </details>
       </section>
 
       <section className="card preview-card">
-        <h2>المعاينة</h2>
-        <p>الاسم يظهر تلقائيًا داخل المستطيل المخصص في الدعوة.</p>
-
         <div className="preview-stage">
           <canvas ref={canvasRef} />
-        </div>
-      </section>
-
-      <section className="card send-card">
-        <h2>الإرسال</h2>
-
-        <div className="field">
-          <label>رقم الجوال</label>
-          <input className="input" dir="ltr" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="777111111" />
-        </div>
-
-        <div className="field">
-          <label>رسالة واتساب</label>
-          <textarea className="textarea" rows={4} value={message} onChange={(e) => setMessage(e.target.value)} />
         </div>
       </section>
 
@@ -349,17 +342,6 @@ export default function Home() {
       <footer className="footer">
         تصميم وبرمجة أبو يماني
       </footer>
-
-      <a
-        className="whatsapp-float"
-        href="https://wa.me/967770816701?text=%D8%A7%D9%84%D8%B3%D9%84%D8%A7%D9%85%20%D8%B9%D9%84%D9%8A%D9%83%D9%85%D8%8C%20%D8%A3%D8%B1%D8%BA%D8%A8%20%D8%A8%D8%A7%D9%84%D8%AA%D9%88%D8%A7%D8%B5%D9%84%20%D8%A8%D8%AE%D8%B5%D9%88%D8%B5%20%D8%AA%D8%B7%D8%A8%D9%8A%D9%82%20%D8%AF%D8%B9%D9%88%D8%A7%D8%AA%20%D8%A7%D9%84%D8%B2%D9%88%D8%A7%D8%AC"
-        target="_blank"
-        rel="noreferrer"
-        aria-label="التواصل عبر واتساب"
-        title="التواصل عبر واتساب"
-      >
-        <WhatsAppIcon />
-      </a>
     </main>
   );
 }

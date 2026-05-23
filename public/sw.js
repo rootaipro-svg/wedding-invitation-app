@@ -1,4 +1,4 @@
-const CACHE_NAME = "wedding-invitations-fixed-exact-v12";
+const CACHE_NAME = "wedding-invitations-final-clean-v20";
 
 self.addEventListener("install", () => {
   self.skipWaiting();
