@@ -79,9 +79,9 @@ export default function Home() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
   const [templateUrl, setTemplateUrl] = useState(DEFAULT_TEMPLATE_URL);
-  const [guestName, setGuestName] = useState("عمر يماني الجابري");
+  const [guestName, setGuestName] = useState("  ");
   const [message, setMessage] = useState(
-    "السلام عليكم ورحمة الله وبركاته\nيشرفنا دعوتكم لحضور حفل الزواج.\nمرفق لكم بطاقة الدعوة."
+    "السلام عليكم ورحمة الله وبركاته\nيشرفنا دعوتكم لحضور حفل الزواج.\n."
   );
 
   const [imageReady, setImageReady] = useState(false);
