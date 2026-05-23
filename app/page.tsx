@@ -27,16 +27,6 @@ const DIWANI_FONT_NAME = "DiwaniCustom";
 const FALLBACK_FONT =
   '"DiwaniCustom", "Aref Ruqaa", "Amiri", "Times New Roman", Arial, Tahoma, serif';
 
-function normalizePhone(phone: string) {
-  let value = String(phone || "").trim().replace(/[^\d]/g, "");
-
-  if (value.startsWith("00")) value = value.slice(2);
-  if (value.startsWith("0")) value = value.slice(1);
-  if (value.length === 9 && value.startsWith("7")) value = `967${value}`;
-
-  return value;
-}
-
 function dataUrlToFile(dataUrl: string, filename: string) {
   const arr = dataUrl.split(",");
   const mimeMatch = arr[0].match(/:(.*?);/);
@@ -88,6 +78,17 @@ export default function Home() {
   const [status, setStatus] = useState("");
   const [canInstall, setCanInstall] = useState(false);
   const [fontLoaded, setFontLoaded] = useState(false);
+
+  const [shareCount, setShareCount] = useState(0);
+  const [downloadCount, setDownloadCount] = useState(0);
+
+  useEffect(() => {
+    const savedShareCount = Number(localStorage.getItem("shareCount") || "0");
+    const savedDownloadCount = Number(localStorage.getItem("downloadCount") || "0");
+
+    setShareCount(savedShareCount);
+    setDownloadCount(savedDownloadCount);
+  }, []);
 
   useEffect(() => {
     const handler = (e: Event) => {
@@ -257,6 +258,10 @@ export default function Home() {
     link.href = dataUrl;
     link.click();
 
+    const nextDownloadCount = downloadCount + 1;
+    setDownloadCount(nextDownloadCount);
+    localStorage.setItem("downloadCount", String(nextDownloadCount));
+
     setStatus("تم تجهيز تحميل الصورة.");
   }
 
@@ -282,6 +287,10 @@ export default function Home() {
           files: [file],
         });
 
+        const nextShareCount = shareCount + 1;
+        setShareCount(nextShareCount);
+        localStorage.setItem("shareCount", String(nextShareCount));
+
         setStatus("تم فتح نافذة المشاركة. اختر واتساب ثم أرسل الدعوة.");
       } catch {
         setStatus("تم إلغاء المشاركة أو تعذرت من المتصفح.");
@@ -291,6 +300,16 @@ export default function Home() {
         "المتصفح لا يدعم مشاركة الصور مباشرة. استخدم زر تحميل الصورة ثم أرسلها من واتساب."
       );
     }
+  }
+
+  function resetStats() {
+    localStorage.setItem("shareCount", "0");
+    localStorage.setItem("downloadCount", "0");
+
+    setShareCount(0);
+    setDownloadCount(0);
+
+    setStatus("تم تصفير الإحصائية.");
   }
 
   return (
@@ -317,6 +336,24 @@ export default function Home() {
           </button>
         ) : null}
       </header>
+
+      <section className="card stats-card">
+        <div className="stats-grid">
+          <div>
+            <span>تمت المشاركة</span>
+            <strong>{shareCount}</strong>
+          </div>
+
+          <div>
+            <span>تم التحميل</span>
+            <strong>{downloadCount}</strong>
+          </div>
+        </div>
+
+        <button className="reset-stats-btn" onClick={resetStats}>
+          تصفير الإحصائية
+        </button>
+      </section>
 
       <section className="card input-card compact-top">
         <div className="field">
