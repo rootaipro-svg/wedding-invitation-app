@@ -413,3 +413,14 @@ canvas {
   font-weight: 800;
   cursor: pointer;
 }
+
+.send-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.btn-icon {
+  flex: 0 0 auto;
+}
