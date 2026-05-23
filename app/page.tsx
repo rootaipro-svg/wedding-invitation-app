@@ -14,13 +14,23 @@ declare global {
   }
 }
 
+/*
+  إعدادات ثابتة لهذا القالب فقط:
+  الاسم يوضع داخل المستطيل أسفل عبارة "بدعوة المكرم".
+  إذا احتجت تعديل بسيط جدًا:
+  - زِد NAME_Y_PERCENT لإنزال الاسم
+  - أنقص NAME_Y_PERCENT لرفع الاسم
+*/
+const DEFAULT_TEMPLATE_URL = "/fixed-invitation-template.png";
 const NAME_X_PERCENT = 50;
-const NAME_Y_PERCENT = 38.4;
-const NAME_FONT_SIZE = 58;
-const NAME_BOX_WIDTH_PERCENT = 70;
-const NAME_COLOR = "#111111";
-const NAME_WEIGHT = "700";
-const NAME_LINE_HEIGHT = 1.25;
+const NAME_Y_PERCENT = 27.0;
+const NAME_FONT_SIZE = 46;
+const NAME_BOX_WIDTH_PERCENT = 76;
+const NAME_COLOR = "#000000";
+const NAME_WEIGHT = "400";
+const DIWANI_FONT_NAME = "DiwaniCustom";
+const FALLBACK_FONT =
+  '"DiwaniCustom", "Aref Ruqaa", "Reem Kufi", "Amiri", "Times New Roman", Arial, Tahoma, serif';
 
 function normalizePhone(phone: string) {
   let value = String(phone || "").trim().replace(/[^\d]/g, "");
@@ -28,25 +38,6 @@ function normalizePhone(phone: string) {
   if (value.startsWith("0")) value = value.slice(1);
   if (value.length === 9 && value.startsWith("7")) value = `967${value}`;
   return value;
-}
-
-function wrapText(ctx: CanvasRenderingContext2D, text: string, maxWidth: number) {
-  const words = text.trim().split(/\s+/).filter(Boolean);
-  const lines: string[] = [];
-  let current = "";
-
-  for (const word of words) {
-    const test = current ? `${current} ${word}` : word;
-    if (ctx.measureText(test).width > maxWidth && current) {
-      lines.push(current);
-      current = word;
-    } else {
-      current = test;
-    }
-  }
-
-  if (current) lines.push(current);
-  return lines.slice(0, 2);
 }
 
 function dataUrlToFile(dataUrl: string, filename: string) {
@@ -58,6 +49,24 @@ function dataUrlToFile(dataUrl: string, filename: string) {
   const bytes = new Uint8Array(length);
   while (length--) bytes[length] = binary.charCodeAt(length);
   return new File([bytes], filename, { type: mime });
+}
+
+function fitSingleLineFontSize(
+  ctx: CanvasRenderingContext2D,
+  text: string,
+  maxWidth: number,
+  startSize: number,
+  minSize: number
+) {
+  let size = startSize;
+
+  while (size >= minSize) {
+    ctx.font = `${NAME_WEIGHT} ${size}px ${FALLBACK_FONT}`;
+    if (ctx.measureText(text).width <= maxWidth) return size;
+    size -= 2;
+  }
+
+  return minSize;
 }
 
 function WhatsAppIcon() {
@@ -72,7 +81,7 @@ function WhatsAppIcon() {
 export default function Home() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
-  const [templateUrl, setTemplateUrl] = useState("");
+  const [templateUrl, setTemplateUrl] = useState(DEFAULT_TEMPLATE_URL);
   const [guestName, setGuestName] = useState("عمر يماني الجابري");
   const [phone, setPhone] = useState("777111111");
   const [message, setMessage] = useState(
@@ -81,6 +90,7 @@ export default function Home() {
   const [imageReady, setImageReady] = useState(false);
   const [status, setStatus] = useState("");
   const [canInstall, setCanInstall] = useState(false);
+  const [fontLoaded, setFontLoaded] = useState(false);
 
   useEffect(() => {
     const handler = (e: Event) => {
@@ -96,6 +106,22 @@ export default function Home() {
     }
 
     return () => window.removeEventListener("beforeinstallprompt", handler);
+  }, []);
+
+  useEffect(() => {
+    async function loadDiwaniFont() {
+      try {
+        const font = new FontFace(DIWANI_FONT_NAME, 'url("/fonts/Diwani.ttf")');
+        await font.load();
+        document.fonts.add(font);
+        setFontLoaded(true);
+      } catch {
+        // التطبيق سيعمل بخط احتياطي إذا لم يكن ملف Diwani.ttf موجودًا
+        setFontLoaded(false);
+      }
+    }
+
+    loadDiwaniFont();
   }, []);
 
   const whatsappUrl = useMemo(() => {
@@ -115,7 +141,7 @@ export default function Home() {
 
     const url = URL.createObjectURL(file);
     setTemplateUrl(url);
-    setStatus("تم رفع قالب الدعوة. اكتب الاسم وسيظهر مباشرة في مكانه.");
+    setStatus("تم رفع القالب. اكتب الاسم وسيظهر داخل المستطيل.");
   }
 
   useEffect(() => {
@@ -130,7 +156,7 @@ export default function Home() {
     const img = new window.Image();
 
     img.onload = () => {
-      const maxCanvasWidth = 1600;
+      const maxCanvasWidth = 1800;
       const scale = img.width > maxCanvasWidth ? maxCanvasWidth / img.width : 1;
       const width = Math.round(img.width * scale);
       const height = Math.round(img.height * scale);
@@ -144,31 +170,37 @@ export default function Home() {
       ctx.clearRect(0, 0, width, height);
       ctx.drawImage(img, 0, 0, width, height);
 
-      const computedFontSize = Math.max(12, Math.round(NAME_FONT_SIZE * scale));
-      ctx.font = `${NAME_WEIGHT} ${computedFontSize}px "Arial", "Tahoma", cursive, sans-serif`;
+      const text = guestName.trim();
+      if (!text) {
+        setImageReady(true);
+        return;
+      }
+
+      const x = width * (NAME_X_PERCENT / 100);
+      const y = height * (NAME_Y_PERCENT / 100);
+      const maxTextWidth = width * (NAME_BOX_WIDTH_PERCENT / 100);
+      const startSize = Math.round(NAME_FONT_SIZE * scale);
+      const minSize = Math.round(27 * scale);
+
+      const fittedSize = fitSingleLineFontSize(ctx, text, maxTextWidth, startSize, minSize);
+
+      ctx.save();
+
+      ctx.font = `${NAME_WEIGHT} ${fittedSize}px ${FALLBACK_FONT}`;
       ctx.fillStyle = NAME_COLOR;
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
       ctx.direction = "rtl";
 
-      const maxTextWidth = width * (NAME_BOX_WIDTH_PERCENT / 100);
-      const lines = wrapText(ctx, guestName, maxTextWidth);
-      const x = width * (NAME_X_PERCENT / 100);
-      const y = height * (NAME_Y_PERCENT / 100);
-      const lineGap = computedFontSize * NAME_LINE_HEIGHT;
-      const totalHeight = (lines.length - 1) * lineGap;
-
-      ctx.save();
-      ctx.shadowColor = "rgba(255,255,255,0.9)";
-      ctx.shadowBlur = Math.round(2 * scale);
+      // ظل خفيف جدًا حتى لا يبدو الاسم مركبًا بشكل حاد
+      ctx.shadowColor = "rgba(255,255,255,0.65)";
+      ctx.shadowBlur = Math.round(1.5 * scale);
       ctx.shadowOffsetX = 0;
       ctx.shadowOffsetY = 0;
 
-      lines.forEach((line, index) => {
-        ctx.fillText(line, x, y - totalHeight / 2 + index * lineGap);
-      });
-
+      ctx.fillText(text, x, y);
       ctx.restore();
+
       setImageReady(true);
     };
 
@@ -178,7 +210,7 @@ export default function Home() {
     };
 
     img.src = templateUrl;
-  }, [templateUrl, guestName]);
+  }, [templateUrl, guestName, fontLoaded]);
 
   async function installApp() {
     if (!window.deferredPrompt) {
@@ -201,7 +233,7 @@ export default function Home() {
   function downloadImage() {
     const dataUrl = getPngDataUrl();
     if (!dataUrl) {
-      setStatus("ارفع قالب الدعوة أولًا.");
+      setStatus("اكتب الاسم أولًا.");
       return;
     }
 
@@ -216,7 +248,7 @@ export default function Home() {
   async function shareImage() {
     const dataUrl = getPngDataUrl();
     if (!dataUrl) {
-      setStatus("ارفع قالب الدعوة أولًا.");
+      setStatus("اكتب الاسم أولًا.");
       return;
     }
 
@@ -255,7 +287,7 @@ export default function Home() {
           <Image src="/logo.png" alt="شعار التطبيق" width={48} height={48} className="brand-logo" />
           <div className="brand-title">
             <h1>تجهيز دعوات الزواج</h1>
-            <p>نسخة ثابتة لهذه الدعوة</p>
+            <p>اكتب الاسم فقط وستجهز البطاقة</p>
           </div>
         </div>
 
@@ -268,30 +300,29 @@ export default function Home() {
 
       <section className="card input-card">
         <div className="field">
-          <label>قالب الدعوة</label>
-          <input className="input" type="file" accept="image/*" onChange={handleTemplateUpload} />
+          <label>اسم المدعو</label>
+          <input
+            className="input name-input"
+            value={guestName}
+            onChange={(e) => setGuestName(e.target.value)}
+            placeholder="اكتب اسم المدعو هنا"
+          />
         </div>
 
-        <div className="field">
-          <label>اسم المدعو</label>
-          <input className="input name-input" value={guestName} onChange={(e) => setGuestName(e.target.value)} />
-        </div>
+        <details className="optional-template">
+          <summary>تغيير قالب الدعوة</summary>
+          <div className="field optional-upload">
+            <input className="input" type="file" accept="image/*" onChange={handleTemplateUpload} />
+          </div>
+        </details>
       </section>
 
       <section className="card preview-card">
         <h2>المعاينة</h2>
-        <p>اكتب الاسم فقط، وسيظهر مباشرة في مكانه المناسب.</p>
+        <p>الاسم يظهر تلقائيًا داخل المستطيل أسفل عبارة بدعوة المكرم.</p>
 
         <div className="preview-stage">
-          {templateUrl ? (
-            <canvas ref={canvasRef} />
-          ) : (
-            <div className="placeholder">
-              <strong>ارفع قالب الدعوة</strong>
-              <br />
-              ثم اكتب اسم المدعو.
-            </div>
-          )}
+          <canvas ref={canvasRef} />
         </div>
       </section>
 
