@@ -424,3 +424,19 @@ canvas {
 .btn-icon {
   flex: 0 0 auto;
 }
+.send-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: #25D366 !important;
+  color: #ffffff !important;
+}
+
+.send-btn:hover {
+  background: #1ebe5d !important;
+}
+
+.btn-icon {
+  flex: 0 0 auto;
+}
