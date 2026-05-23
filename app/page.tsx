@@ -3,8 +3,6 @@
 import Image from "next/image";
 import { ChangeEvent, useEffect, useMemo, useRef, useState } from "react";
 
-type FontWeight = "400" | "700";
-
 declare global {
   interface BeforeInstallPromptEvent extends Event {
     prompt: () => Promise<void>;
@@ -15,6 +13,14 @@ declare global {
     deferredPrompt?: BeforeInstallPromptEvent | null;
   }
 }
+
+const NAME_X_PERCENT = 50;
+const NAME_Y_PERCENT = 38.4;
+const NAME_FONT_SIZE = 58;
+const NAME_BOX_WIDTH_PERCENT = 70;
+const NAME_COLOR = "#111111";
+const NAME_WEIGHT = "700";
+const NAME_LINE_HEIGHT = 1.25;
 
 function normalizePhone(phone: string) {
   let value = String(phone || "").trim().replace(/[^\d]/g, "");
@@ -40,7 +46,7 @@ function wrapText(ctx: CanvasRenderingContext2D, text: string, maxWidth: number)
   }
 
   if (current) lines.push(current);
-  return lines.slice(0, 3);
+  return lines.slice(0, 2);
 }
 
 function dataUrlToFile(dataUrl: string, filename: string) {
@@ -70,21 +76,11 @@ export default function Home() {
   const [guestName, setGuestName] = useState("عمر يماني الجابري");
   const [phone, setPhone] = useState("777111111");
   const [message, setMessage] = useState(
-    "السلام عليكم ورحمة الله وبركاته\nيشرفنا دعوتكم لحضور حفل الزواج.\nالمرفق لكم بطاقة الدعوة."
+    "السلام عليكم ورحمة الله وبركاته\nيشرفنا دعوتكم لحضور حفل الزواج.\nمرفق لكم بطاقة الدعوة."
   );
-
-  const [xPercent, setXPercent] = useState(40);
-  const [yPercent, setYPercent] = useState(22);
-  const [fontSize, setFontSize] = useState(54);
-  const [fontColor, setFontColor] = useState("#8B2E2E");
-  const [fontWeight, setFontWeight] = useState<FontWeight>("700");
-  const [boxWidthPercent, setBoxWidthPercent] = useState(78);
-  const [lineHeight, setLineHeight] = useState(1.35);
-
   const [imageReady, setImageReady] = useState(false);
   const [status, setStatus] = useState("");
   const [canInstall, setCanInstall] = useState(false);
-  const [advancedOpen, setAdvancedOpen] = useState(false);
 
   useEffect(() => {
     const handler = (e: Event) => {
@@ -119,7 +115,7 @@ export default function Home() {
 
     const url = URL.createObjectURL(file);
     setTemplateUrl(url);
-    setStatus("تم رفع القالب. حرّك الاسم من الإعدادات وستظهر النتيجة مباشرة.");
+    setStatus("تم رفع قالب الدعوة. اكتب الاسم وسيظهر مباشرة في مكانه.");
   }
 
   useEffect(() => {
@@ -148,23 +144,23 @@ export default function Home() {
       ctx.clearRect(0, 0, width, height);
       ctx.drawImage(img, 0, 0, width, height);
 
-      const computedFontSize = Math.max(12, Math.round(fontSize * scale));
-      ctx.font = `${fontWeight} ${computedFontSize}px Arial, Tahoma, sans-serif`;
-      ctx.fillStyle = fontColor;
+      const computedFontSize = Math.max(12, Math.round(NAME_FONT_SIZE * scale));
+      ctx.font = `${NAME_WEIGHT} ${computedFontSize}px "Arial", "Tahoma", cursive, sans-serif`;
+      ctx.fillStyle = NAME_COLOR;
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
       ctx.direction = "rtl";
 
-      const maxTextWidth = width * (boxWidthPercent / 100);
+      const maxTextWidth = width * (NAME_BOX_WIDTH_PERCENT / 100);
       const lines = wrapText(ctx, guestName, maxTextWidth);
-      const x = width * (xPercent / 100);
-      const y = height * (yPercent / 100);
-      const lineGap = computedFontSize * lineHeight;
+      const x = width * (NAME_X_PERCENT / 100);
+      const y = height * (NAME_Y_PERCENT / 100);
+      const lineGap = computedFontSize * NAME_LINE_HEIGHT;
       const totalHeight = (lines.length - 1) * lineGap;
 
       ctx.save();
-      ctx.shadowColor = "rgba(255,255,255,0.96)";
-      ctx.shadowBlur = Math.round(12 * scale);
+      ctx.shadowColor = "rgba(255,255,255,0.9)";
+      ctx.shadowBlur = Math.round(2 * scale);
       ctx.shadowOffsetX = 0;
       ctx.shadowOffsetY = 0;
 
@@ -182,17 +178,7 @@ export default function Home() {
     };
 
     img.src = templateUrl;
-  }, [
-    templateUrl,
-    guestName,
-    xPercent,
-    yPercent,
-    fontSize,
-    fontColor,
-    fontWeight,
-    boxWidthPercent,
-    lineHeight,
-  ]);
+  }, [templateUrl, guestName]);
 
   async function installApp() {
     if (!window.deferredPrompt) {
@@ -262,17 +248,6 @@ export default function Home() {
     window.open(whatsappUrl, "_blank", "noopener,noreferrer");
   }
 
-  function resetPosition() {
-    setXPercent(40);
-    setYPercent(22);
-    setFontSize(54);
-    setBoxWidthPercent(78);
-    setLineHeight(1.35);
-    setFontColor("#8B2E2E");
-    setFontWeight("700");
-    setStatus("تمت إعادة ضبط مكان الاسم.");
-  }
-
   return (
     <main className="app-shell">
       <header className="topbar">
@@ -280,7 +255,7 @@ export default function Home() {
           <Image src="/logo.png" alt="شعار التطبيق" width={48} height={48} className="brand-logo" />
           <div className="brand-title">
             <h1>تجهيز دعوات الزواج</h1>
-            <p>خصص البطاقة وشاهد النتيجة مباشرة</p>
+            <p>نسخة ثابتة لهذه الدعوة</p>
           </div>
         </div>
 
@@ -291,123 +266,52 @@ export default function Home() {
         ) : null}
       </header>
 
-      <section className="mobile-flow">
-        <div className="card compact-card">
-          <div className="field">
-            <label>قالب الدعوة</label>
-            <input className="input" type="file" accept="image/*" onChange={handleTemplateUpload} />
-          </div>
-
-          <div className="field">
-            <label>اسم المدعو</label>
-            <input className="input" value={guestName} onChange={(e) => setGuestName(e.target.value)} />
-          </div>
+      <section className="card input-card">
+        <div className="field">
+          <label>قالب الدعوة</label>
+          <input className="input" type="file" accept="image/*" onChange={handleTemplateUpload} />
         </div>
 
-        <div className="card preview-card">
-          <div className="preview-title-row">
-            <div>
-              <h2>المعاينة المباشرة</h2>
-              <p>عدّل الإعدادات أسفل الصورة وشاهد التغيير فورًا.</p>
-            </div>
-          </div>
-
-          <div className="preview-stage">
-            {templateUrl ? (
-              <canvas ref={canvasRef} />
-            ) : (
-              <div className="placeholder">
-                <strong>ارفع قالب الدعوة أولًا</strong>
-                <br />
-                ستظهر البطاقة هنا مباشرة.
-              </div>
-            )}
-          </div>
+        <div className="field">
+          <label>اسم المدعو</label>
+          <input className="input name-input" value={guestName} onChange={(e) => setGuestName(e.target.value)} />
         </div>
-
-        <div className="card controls-card">
-          <h2>تحريك الاسم على القالب</h2>
-
-          <div className="field">
-            <label>يمين / يسار</label>
-            <div className="range-grid">
-              <input type="range" min="0" max="100" value={xPercent} onChange={(e) => setXPercent(Number(e.target.value))} />
-              <input className="input mini-input" dir="ltr" value={xPercent} onChange={(e) => setXPercent(Number(e.target.value))} />
-            </div>
-          </div>
-
-          <div className="field">
-            <label>أعلى / أسفل</label>
-            <div className="range-grid">
-              <input type="range" min="0" max="100" value={yPercent} onChange={(e) => setYPercent(Number(e.target.value))} />
-              <input className="input mini-input" dir="ltr" value={yPercent} onChange={(e) => setYPercent(Number(e.target.value))} />
-            </div>
-          </div>
-
-          <div className="two-col">
-            <div className="field">
-              <label>حجم الخط</label>
-              <input className="input" type="number" dir="ltr" value={fontSize} min="10" max="160" onChange={(e) => setFontSize(Number(e.target.value))} />
-            </div>
-
-            <div className="field">
-              <label>عرض الاسم</label>
-              <input className="input" type="number" dir="ltr" value={boxWidthPercent} min="20" max="100" onChange={(e) => setBoxWidthPercent(Number(e.target.value))} />
-            </div>
-          </div>
-
-          <button className="advanced-toggle" onClick={() => setAdvancedOpen((value) => !value)}>
-            <span>إعدادات إضافية</span>
-            <span>{advancedOpen ? "إخفاء" : "إظهار"}</span>
-          </button>
-
-          {advancedOpen ? (
-            <div className="advanced-box">
-              <div className="two-col">
-                <div className="field">
-                  <label>سماكة الخط</label>
-                  <select className="select" value={fontWeight} onChange={(e) => setFontWeight(e.target.value as FontWeight)}>
-                    <option value="400">عادي</option>
-                    <option value="700">عريض</option>
-                  </select>
-                </div>
-
-                <div className="field">
-                  <label>لون الخط</label>
-                  <div className="color-grid">
-                    <input className="input" dir="ltr" value={fontColor} onChange={(e) => setFontColor(e.target.value)} />
-                    <input type="color" value={fontColor} onChange={(e) => setFontColor(e.target.value)} />
-                  </div>
-                </div>
-              </div>
-
-              <div className="field">
-                <label>تباعد الأسطر</label>
-                <input className="input" type="number" step="0.05" min="1" max="2.5" dir="ltr" value={lineHeight} onChange={(e) => setLineHeight(Number(e.target.value))} />
-              </div>
-            </div>
-          ) : null}
-        </div>
-
-        <div className="card details-card">
-          <h2>الإرسال</h2>
-
-          <div className="field">
-            <label>رقم الجوال</label>
-            <input className="input" dir="ltr" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="777111111" />
-          </div>
-
-          <div className="field">
-            <label>رسالة واتساب</label>
-            <textarea className="textarea" rows={4} value={message} onChange={(e) => setMessage(e.target.value)} />
-          </div>
-        </div>
-
-        {status ? <div className="status">{status}</div> : null}
       </section>
 
+      <section className="card preview-card">
+        <h2>المعاينة</h2>
+        <p>اكتب الاسم فقط، وسيظهر مباشرة في مكانه المناسب.</p>
+
+        <div className="preview-stage">
+          {templateUrl ? (
+            <canvas ref={canvasRef} />
+          ) : (
+            <div className="placeholder">
+              <strong>ارفع قالب الدعوة</strong>
+              <br />
+              ثم اكتب اسم المدعو.
+            </div>
+          )}
+        </div>
+      </section>
+
+      <section className="card send-card">
+        <h2>الإرسال</h2>
+
+        <div className="field">
+          <label>رقم الجوال</label>
+          <input className="input" dir="ltr" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="777111111" />
+        </div>
+
+        <div className="field">
+          <label>رسالة واتساب</label>
+          <textarea className="textarea" rows={4} value={message} onChange={(e) => setMessage(e.target.value)} />
+        </div>
+      </section>
+
+      {status ? <div className="status">{status}</div> : null}
+
       <div className="bottom-actions">
-        <button className="btn btn-secondary" onClick={resetPosition}>ضبط</button>
         <button className="btn btn-primary" disabled={!imageReady} onClick={shareImage}>مشاركة</button>
         <button className="btn btn-outline" disabled={!imageReady} onClick={downloadImage}>تحميل</button>
         <button className="btn btn-secondary" onClick={openWhatsApp}>واتساب</button>
