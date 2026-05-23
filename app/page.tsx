@@ -23,8 +23,8 @@ declare global {
 */
 const DEFAULT_TEMPLATE_URL = "/fixed-invitation-template.png";
 const NAME_X_PERCENT = 42.2;
-const NAME_Y_PERCENT = 32.1;
-const NAME_FONT_SIZE = 50;
+const NAME_Y_PERCENT = 32.4;
+const NAME_FONT_SIZE = 55;
 const NAME_BOX_WIDTH_PERCENT = 76;
 const NAME_COLOR = "#000000";
 const NAME_WEIGHT = "700";
